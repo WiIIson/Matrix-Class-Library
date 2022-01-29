@@ -3,8 +3,9 @@
 
 using namespace std;
 
+// A more simplified 2D vector
 class Matrix {
-    private:
+    protected:
         vector<vector<double>> data;  // Internal data storage
         int rows;       // Number of rows
         int cols;       // Number of columns
@@ -62,9 +63,11 @@ class Matrix {
         // Add a new row to the end of the matrix
         void expandRow(vector<double> r) {
             if (r.size() != cols) {
-                throw invalid_argument("Cannot add a row of size " + 
-                    to_string(r.size()) + " to a matrix with " + to_string(cols) +
-                    " column length.");
+                throw invalid_argument(
+                    "Tried to add a row with " + 
+                    to_string(r.size()) + " columns to a Matrix with " + 
+                    to_string(cols) + " columns."
+                );
             }
             else {
                 data.push_back(r);
@@ -88,9 +91,11 @@ class Matrix {
         // Add a new column to the end of the matrix
         void expandCol(vector<double> c) {
             if (c.size() != rows) {
-                throw invalid_argument("Cannot add a column of size " + 
-                    to_string(c.size()) + " to a matrix with " + to_string(rows) +
-                    " row length.");
+                throw invalid_argument(
+                    "Tried to add a column with " + 
+                    to_string(c.size()) + " rows to a Matrix with " +
+                    to_string(rows) + " rows."
+                );
             }
             else {
                 for (int i = 0; i < rows; i++) {
@@ -117,6 +122,10 @@ class Matrix {
                 m.expandRow(this->getCol(i));
             }
             return m;
+        }
+
+        Matrix inverse() {
+
         }
 
         // Swap two rows
@@ -155,6 +164,44 @@ class Matrix {
                 for (int j = 0; j < cols; j++) {
                     data[i][j] = d[i][j];
                 }
+            }
+            return;
+        }
+        
+        Matrix operator*(Matrix m) {
+            if (cols != m.rows) {
+                throw invalid_argument(
+                    "Trying to multiply a " + to_string(rows) + "x" +
+                    to_string(cols) + " Matrix by a " + to_string(m.rows) +
+                    "x" + to_string(m.cols) + " Matrix"
+                );
+            }
+            Matrix n = Matrix(rows, m.cols);
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < m.cols; j++) {
+                    int rowSum = 0;
+                    for (int k = 0; k < cols; k++) {
+                        rowSum += data[i][k] * m.data[k][j];
+                    }
+                    n.data[i][j] = rowSum;
+                }
+            }
+            return n;
+        }
+};
+
+// A matrix representing a formula, which can be solved using 
+// elementary row operations
+class Augmatrix: public Matrix {
+    public:
+        Augmatrix(vector<vector<double>> v) : Matrix(v) { }
+
+        void printMatrix() {
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols - 1; j++) {
+                    cout << data[i][j] << "\t";
+                }
+                cout << "\t|\t" << data[i][cols] << endl;
             }
             return;
         }
